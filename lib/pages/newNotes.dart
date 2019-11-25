@@ -3,6 +3,7 @@ import 'package:notepad/models/Category.dart';
 import 'package:notepad/models/Notes.dart';
 import 'package:notepad/utils/dbhelper.dart';
 import 'package:flushbar/flushbar.dart';
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 
 class NoteDetail extends StatefulWidget {
   String title = "";
@@ -15,6 +16,7 @@ class NoteDetail extends StatefulWidget {
 }
 
 class _NoteDetailState extends State<NoteDetail> {
+  FlutterLocalNotificationsPlugin notification;
   var formKey = GlobalKey<FormState>();
   DataBaseHelper db;
   List<Category> allCategory;
@@ -30,6 +32,13 @@ class _NoteDetailState extends State<NoteDetail> {
     super.initState();
     allCategory = List<Category>();
     db = DataBaseHelper();
+    notification=new FlutterLocalNotificationsPlugin();
+    var android =new AndroidInitializationSettings("app_icon");
+    var ios=new IOSInitializationSettings();
+    var initsettings=new InitializationSettings(android, ios);
+    notification.initialize(initsettings,onSelectNotification: selectNotification);
+
+
     //kategorileri al listeye nesneye çevirip ekle
     db.fetchCategory().then((catList) {
       for (Map item in catList) {
@@ -38,7 +47,12 @@ class _NoteDetailState extends State<NoteDetail> {
       setState(() {});
     });
   }
-
+    Future selectNotification(String payload){
+      showDialog(context: context,builder: (_)=>AlertDialog(
+        title: Text("Selam Müdür Bildirime Tıkladım"),
+        content: Text(payload),
+      ));
+    }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -206,6 +220,7 @@ class _NoteDetailState extends State<NoteDetail> {
                                 .then((res) {
                               if (res != 0) {
                                 Navigator.pop(context);
+                                showNotification("Not Oluşturuldu","$noteTitle ' adlı yeni bir not oluşturdunuz :)");
                                 Flushbar(
                                   message: "$noteTitle Başarı İle Eklendi",
                                   icon: Icon(
@@ -277,5 +292,45 @@ class _NoteDetailState extends State<NoteDetail> {
               ],
             )))
         .toList();
+  }
+
+  Future<void> showNotification(title,text) async{
+    /*var scheduledNotificationDateTime =
+    new DateTime.now().add(new Duration(seconds: 5));
+    var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('your other channel id',
+        'your other channel name', 'your other channel description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    NotificationDetails platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await notification.schedule(
+        0,
+        'scheduled title',
+        'scheduled body',
+        scheduledNotificationDateTime,
+        platformChannelSpecifics);*/
+
+
+    /*var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('repeating channel id',
+        'repeating channel name', 'repeating description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await notification.periodicallyShow(0, title,
+        text, RepeatInterval.EveryMinute, platformChannelSpecifics);*/
+
+
+
+
+
+
+   /* var android =new AndroidNotificationDetails("1", "S1", "S2",ticker: "ticker",color: Colors.blue,   importance: Importance.Max,priority: Priority.High);
+    var ios=new IOSNotificationDetails();
+    var platform=new NotificationDetails(android, ios);
+    await notification.show(0, title, text,  platform,payload: "Tıklayınca Gösterilen Bildirim İçeriği");*/
+
   }
 }

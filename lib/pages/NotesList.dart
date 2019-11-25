@@ -5,12 +5,42 @@ import 'package:notepad/pages/categoryList.dart';
 import 'package:notepad/pages/newNotes.dart';
 import 'package:notepad/utils/dbhelper.dart';
 import 'package:flushbar/flushbar.dart';
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 
-class NotesList extends StatelessWidget {
+class NotesList extends StatefulWidget {
+  @override
+  _NotesListState createState() => _NotesListState();
+}
+
+class _NotesListState extends State<NotesList> {
   var _scaffoldKey = GlobalKey<ScaffoldState>();
+  FlutterLocalNotificationsPlugin notification;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    notification = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings("app_icon");
+    var ios = new IOSInitializationSettings();
+    var initsettings = new InitializationSettings(android, ios);
+    notification.initialize(initsettings,
+        onSelectNotification: selectNotification);
+  }
+
+  Future selectNotification(String payload) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: Text("Selam Müdür Bildirime Tıkladım"),
+              content: Text(payload),
+            ));
+  }
 
   @override
   Widget build(BuildContext context) {
+    showNotification("Unutma Push Notification", "Tarihe Bak");
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -24,7 +54,7 @@ class NotesList extends StatelessWidget {
                   leading: Icon(Icons.category),
                   title: Text("Kategoriler"),
                   onTap: () {
-                      Navigator.push(context,
+                    Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
                       return Categorys();
                     }));
@@ -148,5 +178,44 @@ class NotesList extends StatelessWidget {
             ],
           );
         });
+  }
+  Future<void> showNotification(title,text) async{
+    /*var scheduledNotificationDateTime =
+    new DateTime.now().add(new Duration(seconds: 5));
+    var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('your other channel id',
+        'your other channel name', 'your other channel description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    NotificationDetails platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await notification.schedule(
+        0,
+        'scheduled title',
+        'scheduled body',
+        scheduledNotificationDateTime,
+        platformChannelSpecifics);*/
+
+
+    /*var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('repeating channel id',
+        'repeating channel name', 'repeating description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await notification.periodicallyShow(0, title,
+        text, RepeatInterval.EveryMinute, platformChannelSpecifics);*/
+
+
+
+
+
+
+     var android =new AndroidNotificationDetails("1", "S1", "S2",ticker: "ticker",color: Colors.blue,   importance: Importance.Max,priority: Priority.High);
+    var ios=new IOSNotificationDetails();
+    var platform=new NotificationDetails(android, ios);
+    await notification.show(0, title, text,  platform,payload: "Tıklayınca Gösterilen Bildirim İçeriği");
+
   }
 }
